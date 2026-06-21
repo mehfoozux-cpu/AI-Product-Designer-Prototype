@@ -1,0 +1,405 @@
+/* ============================================================================
+   ADELPHI DESIGN TOKENS — Coded Source of Truth
+   Extracted from Figma: "Adalfi Design Tokens"
+   Architecture: Material 3-inspired (System roles + Alpha states + Containers)
+
+   HOW THIS FILE IS STRUCTURED
+   ---------------------------------------------------------------------------
+   LAYER 1 — PRIMITIVES (--p-*): raw, mode-independent values. The "ink".
+             You almost never use these directly in a component.
+   LAYER 2 — SEMANTIC  (--color-*, --text-*, --space-*, etc.): named by JOB.
+             These are what you reference everywhere. They point at primitives
+             and they FLIP between light and dark automatically.
+
+   Change a brand value once in LAYER 1 and the whole system updates.
+   Switch theme by toggling  data-theme="light"  /  data-theme="dark"  on <html>.
+   ============================================================================ */
+
+
+/* ============================================================================
+   LAYER 1 — PRIMITIVES
+   ============================================================================ */
+:root {
+
+  /* ---- Brand & core hues (raw) ---------------------------------------- */
+  --p-green-500:        #1ed798;   /* primary (dark-mode value)            */
+  --p-green-600:        #0fa87a;   /* primary (light-mode value)          */
+  --p-green-700:        #08443a;   /* primary container (dark)            */
+  --p-green-900:        #014636;   /* on-primary-container (light)        */
+  --p-mint-200:         #a3f5da;   /* primary container (light)           */
+  --p-mint-300:         #76e3bf;
+  --p-green-bright:     #4effc3;
+  --p-green-vivid:      #17c389;
+
+  /* ---- Neutrals / surfaces (raw) -------------------------------------- */
+  --p-grey-100:         #efefef;   /* near-white neutral — gradient stop in approved-limit card */
+  --p-grey-150:         #eeefed;   /* warm off-white — selected card surface (tenor) */
+  --p-ink-900:          #072126;   /* deep teal-black: dark surface / light text */
+  --p-ink-950:          #0b2126;   /* deepest teal-ink — selected card text (tenor) */
+  --p-ink-850:          #041417;   /* secondary container (dark)          */
+  --p-ink-800:          #113037;   /* surface variant (dark)              */
+  --p-ink-700:          #2f5d63;   /* outline (dark)                      */
+  --p-ink-600:          #394d51;
+  --p-slate-400:        #709397;   /* on-surface-dim (light)              */
+  --p-slate-350:        #8eabb0;   /* on-surface-dim (dark)               */
+  --p-slate-300:        #97abaf;   /* on-bg-dim                           */
+  --p-slate-200:        #c9d0d1;   /* on-bg / on-surface (dark)           */
+  --p-cream-100:        #f5f3ef;   /* light surface / background          */
+  --p-cream-200:        #e7e2d6;   /* secondary (light) / secondary accent*/
+  --p-warm-900:         #18150c;   /* on-secondary (dark)                 */
+  --p-white:            #ffffff;
+  --p-black:            #000000;
+
+  /* ---- Expressive / status hues (raw) --------------------------------- */
+  --p-red-400:          #ff645c;   /* error (dark)                        */
+  --p-red-500:          #f54b42;   /* error (light)                       */
+  --p-red-600:          #e53a2e;   /* error alpha base (light)            */
+  --p-red-950:          #210603;   /* on-error (dark)                     */
+  --p-amber-400:        #fbaf44;   /* warning (dark)                      */
+  --p-amber-500:        #fc8c03;   /* warning (light)                     */
+  --p-amber-950:        #230d01;   /* on-warning (dark)                   */
+  --p-emerald-400:      #43db70;   /* success (dark)                      */
+  --p-emerald-500:      #17cf60;   /* success (light)                     */
+  --p-emerald-950:      #01180d;   /* on-success (dark)                   */
+  --p-blue-400:         #48befe;   /* info (dark)                         */
+  --p-blue-500:         #029bed;   /* info (light)                        */
+  --p-blue-950:         #01121e;   /* on-info (dark)                      */
+
+  /* ---- Typography primitives ------------------------------------------ */
+  --p-font-primary:     'Objectivity', system-ui, -apple-system, sans-serif;
+  --p-font-secondary:   'Inter', system-ui, -apple-system, sans-serif;
+
+  --p-weight-thin:      100;
+  --p-weight-extralight:200;
+  --p-weight-light:     300;
+  --p-weight-regular:   400;
+  --p-weight-medium:    500;
+  --p-weight-semibold:  600;
+  --p-weight-bold:      700;
+  --p-weight-extrabold: 800;
+  --p-weight-black:     900;
+  --p-weight-super:     1000;
+
+  /* letter-spacing (Figma "tracking", in em) */
+  --p-track-tight:     -0.02em;
+  --p-track-normal:     0em;
+  --p-track-wide:       0.02em;
+
+  /* ---- Spacing primitives (Figma layout-scale, in px) ----------------- */
+  /* 4-based scale */
+  --p-4-xxs:    4px;
+  --p-4-xs:     12px;
+  --p-4-sm:     20px;
+  --p-4-base:   28px;
+  --p-4-lg:     36px;
+  --p-4-xl:     44px;
+  --p-4-xxl:    52px;
+  --p-4-xxxl:   60px;
+  /* 8-based scale */
+  --p-8-xxs:    8px;
+  --p-8-xs:     16px;
+  --p-8-sm:     24px;
+  --p-8-base:   32px;
+  --p-8-lg:     40px;
+  --p-8-xl:     48px;
+  --p-8-xxl:    56px;
+  --p-8-xxxl:   64px;
+  /* auxiliary odd steps */
+  --p-aux-xs:   6px;
+  --p-aux-sm:   9px;
+  --p-aux-md:   10px;
+  --p-aux-lg:   14px;
+  --p-aux-xl:   18px;
+  --p-aux-xxl:  22px;
+  /* tiny */
+  --p-tiny-sm:  1px;
+  --p-tiny-md:  2px;
+  --p-tiny-lg:  3px;
+  /* grid */
+  --p-grid-gutter:      16px;
+  --p-grid-gutter-half: 8px;
+
+  /* ---- Radius primitives (Figma border-scale) ------------------------- */
+  --p-radius-none:  0px;
+  --p-radius-sm:    4px;
+  --p-radius-base:  8px;
+  --p-radius-md:    12px;
+  --p-radius-lg:    16px;
+  --p-radius-full:  1000px;
+
+  /* ---- Stroke primitives ---------------------------------------------- */
+  --p-stroke-none:  0px;
+  --p-stroke-base:  1px;
+  --p-stroke-emph:  2px;
+  --p-stroke-med:   3px;
+  --p-stroke-bold:  4px;
+}
+
+
+/* ============================================================================
+   LAYER 2 — SEMANTIC TOKENS  (theme-aware)
+   These reference the primitives above and flip per theme.
+   Default :root = LIGHT.  [data-theme="dark"] overrides to DARK.
+   ============================================================================ */
+:root,
+[data-theme="light"] {
+
+  /* ---- Backgrounds & surfaces ----------------------------------------- */
+  --color-bg:                 var(--p-cream-100);
+  --color-bg-on:              var(--p-ink-900);
+  --color-bg-on-dim:          var(--p-slate-300);
+
+  --color-surface:            var(--p-cream-100);
+  --color-surface-on:         var(--p-ink-900);
+  --color-surface-on-dim:     var(--p-slate-400);
+  --color-surface-variant:    var(--p-cream-100);
+  --color-surface-variant-on: var(--p-ink-900);
+
+  /* ---- Accents (brand roles) ------------------------------------------ */
+  --color-primary:            var(--p-green-600);
+  --color-primary-on:         var(--p-ink-900);
+  --color-secondary:          var(--p-ink-900);
+  --color-secondary-on:       var(--p-cream-100);
+  --color-tertiary:           var(--p-ink-900);
+  --color-tertiary-on:        var(--p-green-500);
+
+  /* ---- Containers ----------------------------------------------------- */
+  --color-primary-container:      var(--p-mint-200);
+  --color-primary-container-on:   var(--p-green-900);
+  --color-secondary-container:    var(--p-mint-200);
+  --color-secondary-container-on: var(--p-green-900);
+
+  /* ---- Expressive / status -------------------------------------------- */
+  --color-error:        var(--p-red-500);
+  --color-error-on:     var(--p-white);
+  --color-warning:      var(--p-amber-500);
+  --color-warning-on:   var(--p-white);
+  --color-success:      var(--p-emerald-500);
+  --color-success-on:   var(--p-white);
+  --color-info:         var(--p-blue-500);
+  --color-info-on:      var(--p-white);
+
+  /* ---- Lines & overlays ----------------------------------------------- */
+  --color-outline:          #9e9e9e;
+  --color-outline-primary:  var(--p-green-600);
+  --color-scrim:            rgba(0,0,0,0.70);
+
+  /* ---- Neutrals (fixed, do not flip) ---------------------------------- */
+  --color-white:  var(--p-white);
+  --color-black:  var(--p-black);
+}
+
+[data-theme="dark"] {
+
+  /* ---- Backgrounds & surfaces ----------------------------------------- */
+  --color-bg:                 var(--p-ink-900);
+  --color-bg-on:              var(--p-slate-200);
+  --color-bg-on-dim:          var(--p-slate-300);
+
+  --color-surface:            var(--p-ink-900);
+  --color-surface-on:         var(--p-slate-200);
+  --color-surface-on-dim:     var(--p-slate-350);
+  --color-surface-variant:    var(--p-ink-800);
+  --color-surface-variant-on: var(--p-white);
+
+  /* ---- Accents -------------------------------------------------------- */
+  --color-primary:            var(--p-green-500);
+  --color-primary-on:         var(--p-ink-900);
+  --color-secondary:          var(--p-cream-200);
+  --color-secondary-on:       var(--p-warm-900);
+  --color-tertiary:           var(--p-ink-900);
+  --color-tertiary-on:        var(--p-green-500);
+
+  /* ---- Containers ----------------------------------------------------- */
+  --color-primary-container:      var(--p-green-700);
+  --color-primary-container-on:   var(--p-green-500);
+  --color-secondary-container:    var(--p-ink-850);
+  --color-secondary-container-on: var(--p-cream-200);
+
+  /* ---- Expressive / status -------------------------------------------- */
+  --color-error:        var(--p-red-400);
+  --color-error-on:     var(--p-red-950);
+  --color-warning:      var(--p-amber-400);
+  --color-warning-on:   var(--p-amber-950);
+  --color-success:      var(--p-emerald-400);
+  --color-success-on:   var(--p-emerald-950);
+  --color-info:         var(--p-blue-400);
+  --color-info-on:      var(--p-blue-950);
+
+  /* ---- Lines & overlays ----------------------------------------------- */
+  --color-outline:          var(--p-ink-700);
+  --color-outline-primary:  var(--p-green-500);
+  --color-scrim:            rgba(0,0,0,0.70);
+
+  /* ---- Neutrals ------------------------------------------------------- */
+  --color-white:  var(--p-white);
+  --color-black:  var(--p-black);
+}
+
+
+/* ============================================================================
+   SEMANTIC — Typography roles (theme-independent)
+   Each role exposes: family, size, line-height, tracking, and weight options.
+   Use like:  font: var(--text-title-lg-weight) var(--text-title-lg-size)/var(--text-title-lg-leading) var(--text-title-lg-face);
+   ============================================================================ */
+:root {
+
+  /* font families by role */
+  --font-display:  var(--p-font-primary);
+  --font-heading:  var(--p-font-primary);
+  --font-body:     var(--p-font-primary);
+  --font-ui:       var(--p-font-primary);
+  --font-data:     var(--p-font-secondary);  /* Inter, for numerals/tables */
+
+  /* weights (semantic aliases) */
+  --weight-light:     var(--p-weight-light);
+  --weight-regular:   var(--p-weight-regular);
+  --weight-medium:    var(--p-weight-medium);
+  --weight-emphasis:  var(--p-weight-semibold);
+  --weight-bold:      var(--p-weight-bold);
+
+  /* ---- DISPLAY ---- */
+  --text-display-lg-size:    104px;  --text-display-lg-leading: 120px;  --text-display-lg-track: var(--p-track-normal);
+  --text-display-md-size:    72px;   --text-display-md-leading: 80px;   --text-display-md-track: var(--p-track-normal);
+  --text-display-sm-size:    44px;   --text-display-sm-leading: 48px;   --text-display-sm-track: var(--p-track-tight);
+
+  /* ---- HEADLINE ---- */
+  --text-headline-lg-size:   40px;   --text-headline-lg-leading: 48px;  --text-headline-lg-track: var(--p-track-tight);
+  --text-headline-md-size:   32px;   --text-headline-md-leading: 40px;  --text-headline-md-track: var(--p-track-tight);
+  --text-headline-sm-size:   24px;   --text-headline-sm-leading: 36px;  --text-headline-sm-track: var(--p-track-tight);
+
+  /* ---- TITLE ---- */
+  --text-title-lg-size:      22px;   --text-title-lg-leading: 32px;     --text-title-lg-track: var(--p-track-normal);
+  --text-title-md-size:      20px;   --text-title-md-leading: 28px;     --text-title-md-track: var(--p-track-normal);
+  --text-title-sm-size:      18px;   --text-title-sm-leading: 24px;     --text-title-sm-track: var(--p-track-wide);
+
+  /* ---- SUBHEAD ---- */
+  --text-subhead-lg-size:    16px;   --text-subhead-lg-leading: 20px;   --text-subhead-lg-track: var(--p-track-normal);
+  --text-subhead-md-size:    14px;   --text-subhead-md-leading: 18px;   --text-subhead-md-track: var(--p-track-wide);
+  --text-subhead-sm-size:    12px;   --text-subhead-sm-leading: 16px;   --text-subhead-sm-track: var(--p-track-wide);
+
+  /* ---- BODY ---- */
+  --text-body-lg-size:       18px;   --text-body-lg-leading: 24px;      --text-body-lg-track: var(--p-track-normal);
+  --text-body-md-size:       16px;   --text-body-md-leading: 20px;      --text-body-md-track: var(--p-track-normal);
+  --text-body-reg-size:      14px;   --text-body-reg-leading: 18px;     --text-body-reg-track: var(--p-track-wide);
+  --text-body-sm-size:       12px;   --text-body-sm-leading: 16px;      --text-body-sm-track: var(--p-track-wide);
+
+  /* ---- CAPTION ---- */
+  --text-caption-reg-size:   13px;   --text-caption-reg-leading: 17px;  --text-caption-reg-track: var(--p-track-wide);
+  --text-caption-sm-size:    11px;   --text-caption-sm-leading: 15px;   --text-caption-sm-track: var(--p-track-wide);
+
+  /* ---- BYLINE ---- */
+  --text-byline-reg-size:    10px;   --text-byline-reg-leading: 14px;   --text-byline-reg-track: var(--p-track-wide);
+  --text-byline-sm-size:     9px;    --text-byline-sm-leading: 13px;    --text-byline-sm-track: var(--p-track-wide);
+
+  /* ---- CTA / button labels ---- */
+  --text-cta-lg-size:        16px;   --text-cta-lg-leading: 24px;       --text-cta-lg-track: var(--p-track-normal);
+  --text-cta-md-size:        15px;   --text-cta-md-leading: 22px;       --text-cta-md-track: var(--p-track-wide);
+  --text-cta-reg-size:       14px;   --text-cta-reg-leading: 20px;      --text-cta-reg-track: var(--p-track-wide);
+  --text-cta-sm-size:        12px;   --text-cta-sm-leading: 16px;       --text-cta-sm-track: var(--p-track-wide);
+  --text-cta-xs-size:        10px;   --text-cta-xs-leading: 14px;       --text-cta-xs-track: var(--p-track-wide);
+}
+
+
+/* ============================================================================
+   SEMANTIC — Spacing roles (theme-independent)
+   Generic step scale + intent aliases designers actually type.
+   ============================================================================ */
+:root {
+
+  /* canonical 8pt-friendly step scale (use these by default) */
+  --space-0:   0px;
+  --space-1:   var(--p-4-xxs);   /* 4  */
+  --space-2:   var(--p-8-xxs);   /* 8  */
+  --space-3:   var(--p-4-xs);    /* 12 */
+  --space-4:   var(--p-8-xs);    /* 16 */
+  --space-5:   var(--p-4-sm);    /* 20 */
+  --space-6:   var(--p-8-sm);    /* 24 */
+  --space-7:   var(--p-4-base);  /* 28 */
+  --space-8:   var(--p-8-base);  /* 32 */
+  --space-9:   var(--p-4-lg);    /* 36 */
+  --space-10:  var(--p-8-lg);    /* 40 */
+  --space-11:  var(--p-4-xl);    /* 44 */
+  --space-12:  var(--p-8-xl);    /* 48 */
+  --space-14:  var(--p-8-xxl);   /* 56 */
+  --space-16:  var(--p-8-xxxl);  /* 64 */
+
+  /* intent aliases — what you reach for when laying out a screen */
+  --space-inset-xs:    var(--space-2);   /* tight padding inside chips      */
+  --space-inset-sm:    var(--space-3);   /* compact card / input padding    */
+  --space-inset-md:    var(--space-4);   /* default container padding       */
+  --space-inset-lg:    var(--space-6);   /* roomy card / section padding    */
+  --space-stack-xs:    var(--space-2);   /* gap between tightly related items */
+  --space-stack-sm:    var(--space-3);
+  --space-stack-md:    var(--space-4);   /* default vertical rhythm         */
+  --space-stack-lg:    var(--space-8);   /* between distinct blocks         */
+  --space-stack-xl:    var(--space-12);  /* between page sections           */
+  --space-gutter:      var(--p-grid-gutter);       /* 16 — grid gutter      */
+  --space-gutter-half: var(--p-grid-gutter-half);  /* 8                     */
+}
+
+
+/* ============================================================================
+   SEMANTIC — Radius, stroke, elevation roles (theme-independent)
+   ============================================================================ */
+:root {
+
+  /* radius by intent */
+  --radius-none:    var(--p-radius-none);
+  --radius-input:   var(--p-radius-base);   /* 8  — inputs, small controls   */
+  --radius-button:  var(--p-radius-base);   /* 8  — default CTA corner       */
+  --radius-button-sm: var(--p-radius-sm);   /* 4                             */
+  --radius-button-lg: var(--p-radius-lg);   /* 16                            */
+  --radius-card:    var(--p-radius-md);     /* 12 — cards / sheets           */
+  --radius-pill:    var(--p-radius-full);   /* 1000 — fully rounded          */
+
+  /* stroke by intent */
+  --stroke-none:    var(--p-stroke-none);
+  --stroke-hairline:var(--p-stroke-base);   /* 1 — default borders/dividers  */
+  --stroke-strong:  var(--p-stroke-emph);   /* 2 — focus rings, emphasis     */
+  --stroke-heavy:   var(--p-stroke-med);    /* 3                             */
+  --stroke-max:     var(--p-stroke-bold);   /* 4                             */
+
+  /* elevation — built from extracted blur/spread/opacity effect primitives */
+  --elevation-1: 0 2px 4px rgba(7,33,38,0.10);
+  --elevation-2: 0 4px 12px rgba(7,33,38,0.12);
+  --elevation-3: 0 8px 24px rgba(7,33,38,0.16);
+  --elevation-4: 0 16px 40px rgba(7,33,38,0.20);
+
+  /* ── Smart Lending flow additions ──────────────────────────────────────── */
+  /* Disbursement success screen — radial glow behind checkmark ring          */
+  --elevation-success-glow: 0 0 60px rgba(30, 215, 152, 0.18), 0 0 120px rgba(30, 215, 152, 0.08);
+  /* Numpad key pressed/active state — subtle primary tint feedback           */
+  --color-numpad-key-active: rgba(30, 215, 152, 0.10);
+  /* Tenor/installment card — selected state surface + on-color               */
+  --color-selected-container:    var(--p-grey-150);  /* #eeefed selected card bg   */
+  --color-selected-container-on: var(--p-ink-950);   /* #0b2126 selected card text */
+
+  /* ── Gradient tokens ────────────────────────────────────────────────────── */
+  /* Figma: Approved Limit card — radial sweep from near-white → green → ink  */
+  --gradient-approved-limit: radial-gradient(
+    281.13% 231.51% at -12.16% -50.5%,
+    var(--p-grey-100) 14.24%,
+    var(--p-green-500) 36.47%,
+    var(--p-ink-900)  100%
+  );
+
+  /* ── Input glow token ───────────────────────────────────────────────────── */
+  /* Amount input field — subtle primary glow to draw user focus              */
+  --elevation-input-glow: 0 0 0 1px rgba(30, 215, 152, 0.35),
+                          0 0 16px rgba(30, 215, 152, 0.18),
+                          0 0 32px rgba(30, 215, 152, 0.08);
+}
+
+
+/* ============================================================================
+   SEMANTIC — CTA / control sizing (theme-independent)
+   Heights + icon sizes for the button scale (tiny → large), from cta-scale.
+   ============================================================================ */
+:root {
+  --control-tiny-height:    20px;  --control-tiny-icon:    14px;
+  --control-sm-height:      24px;  --control-sm-icon:      16px;
+  --control-regular-height: 32px;  --control-regular-icon: 20px;
+  --control-md-height:      40px;  --control-md-icon:      20px;
+  --control-lg-height:      48px;  --control-lg-icon:      24px;
+}

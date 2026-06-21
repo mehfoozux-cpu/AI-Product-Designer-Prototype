@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Adelphi Tokens — Preview</title>
+<link rel="stylesheet" href="adelphi-tokens.css">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-bg-on);
+    font-family: var(--font-body);
+    padding: var(--space-8);
+    transition: background .2s, color .2s;
+  }
+  h1 { font-size: var(--text-headline-md-size); line-height: var(--text-headline-md-leading); letter-spacing: var(--text-headline-md-track); margin: 0 0 var(--space-2); }
+  h2 { font-size: var(--text-title-md-size); line-height: var(--text-title-md-leading); margin: var(--space-10) 0 var(--space-4); color: var(--color-surface-on-dim); text-transform: uppercase; letter-spacing: .08em; font-weight: var(--weight-emphasis); }
+  .toggle { position: fixed; top: var(--space-4); right: var(--space-4); height: var(--control-md-height); padding: 0 var(--space-5); border-radius: var(--radius-pill); border: var(--stroke-hairline) solid var(--color-outline); background: var(--color-primary); color: var(--color-primary-on); font: var(--weight-emphasis) var(--text-cta-size)/1 var(--font-ui); cursor: pointer; font-size: 14px; }
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px,1fr)); gap: var(--space-3); }
+  .sw { border-radius: var(--radius-card); overflow: hidden; border: var(--stroke-hairline) solid var(--color-outline); }
+  .sw .chip { height: 64px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: var(--weight-emphasis); }
+  .sw .label { padding: var(--space-2) var(--space-3); font-size: var(--text-caption-sm-size); background: var(--color-surface-variant); color: var(--color-surface-variant-on); }
+  .type-row { display: flex; align-items: baseline; gap: var(--space-4); padding: var(--space-2) 0; border-bottom: var(--stroke-hairline) solid var(--color-outline); }
+  .type-row .tag { font-size: 11px; color: var(--color-surface-on-dim); min-width: 120px; font-family: var(--font-data); }
+  .space-row { display: flex; align-items: center; gap: var(--space-4); margin-bottom: var(--space-2); }
+  .space-row .bar { height: 16px; background: var(--color-primary); border-radius: var(--radius-button-sm); }
+  .space-row .tag { font-size: 12px; font-family: var(--font-data); color: var(--color-surface-on-dim); min-width: 90px; }
+  .controls { display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; padding: 0 var(--space-5); border: none; border-radius: var(--radius-button); background: var(--color-primary); color: var(--color-primary-on); font-weight: var(--weight-emphasis); cursor: pointer; }
+  .btn.sec { background: var(--color-secondary); color: var(--color-secondary-on); }
+  .btn.out { background: transparent; color: var(--color-primary); border: var(--stroke-strong) solid var(--color-outline-primary); }
+  .status { display:flex; gap: var(--space-3); flex-wrap: wrap; }
+  .pill { padding: var(--space-2) var(--space-4); border-radius: var(--radius-pill); font-size: 13px; font-weight: var(--weight-emphasis); }
+  .card { background: var(--color-surface-variant); color: var(--color-surface-variant-on); border-radius: var(--radius-card); padding: var(--space-6); box-shadow: var(--elevation-2); max-width: 340px; margin-top: var(--space-4); }
+</style>
+</head>
+<body>
+  <button class="toggle" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme==='dark'?'light':'dark'">Toggle theme</button>
+
+  <h1>Adelphi Design Tokens</h1>
+  <div style="font-size:var(--text-body-md-size); color:var(--color-surface-on-dim)">Live preview — toggle theme (top right) to verify Light + Dark against Figma.</div>
+
+  <h2>Accents & system</h2>
+  <div class="swatches">
+    <div class="sw"><div class="chip" style="background:var(--color-primary);color:var(--color-primary-on)">primary</div><div class="label">primary</div></div>
+    <div class="sw"><div class="chip" style="background:var(--color-secondary);color:var(--color-secondary-on)">secondary</div><div class="label">secondary</div></div>
+    <div class="sw"><div class="chip" style="background:var(--color-tertiary);color:var(--color-tertiary-on)">tertiary</div><div class="label">tertiary</div></div>
+    <div class="sw"><div class="chip" style="background:var(--color-primary-container);color:var(--color-primary-container-on)">container</div><div class="label">primary-container</div></div>
+    <div class="sw"><div class="chip" style="background:var(--color-surface);color:var(--color-surface-on);border-bottom:1px solid var(--color-outline)">surface</div><div class="label">surface</div></div>
+    <div class="sw"><div class="chip" style="background:var(--color-surface-variant);color:var(--color-surface-variant-on)">surf variant</div><div class="label">surface-variant</div></div>
+  </div>
+
+  <h2>Expressive / status</h2>
+  <div class="swatches">
+    <div class="sw"><div class="chip" style="background:var(--color-error);color:var(--color-error-on)">error</div><div class="label">error</div></div>
+    <div class="sw"><div class="chip" style="background:var(--color-warning);color:var(--color-warning-on)">warning</div><div class="label">warning</div></div>
+    <div class="sw"><div class="chip" style="background:var(--color-success);color:var(--color-success-on)">success</div><div class="label">success</div></div>
+    <div class="sw"><div class="chip" style="background:var(--color-info);color:var(--color-info-on)">info</div><div class="label">info</div></div>
+  </div>
+
+  <h2>Type scale</h2>
+  <div>
+    <div class="type-row"><span class="tag">display-sm 44</span><span style="font-size:var(--text-display-sm-size);line-height:1;letter-spacing:var(--text-display-sm-track)">Move money</span></div>
+    <div class="type-row"><span class="tag">headline-lg 40</span><span style="font-size:var(--text-headline-lg-size);line-height:1">Send to anyone</span></div>
+    <div class="type-row"><span class="tag">title-lg 22</span><span style="font-size:var(--text-title-lg-size)">Account balance</span></div>
+    <div class="type-row"><span class="tag">body-md 16</span><span style="font-size:var(--text-body-md-size)">Your transfer is on its way and will arrive shortly.</span></div>
+    <div class="type-row"><span class="tag">caption 13</span><span style="font-size:var(--text-caption-reg-size)">Updated just now</span></div>
+    <div class="type-row"><span class="tag">cta-lg 16</span><span style="font-size:var(--text-cta-lg-size);font-weight:var(--weight-emphasis)">Continue</span></div>
+  </div>
+
+  <h2>Spacing scale</h2>
+  <div>
+    <div class="space-row"><span class="tag">space-1 / 4</span><div class="bar" style="width:var(--space-1)"></div></div>
+    <div class="space-row"><span class="tag">space-2 / 8</span><div class="bar" style="width:var(--space-2)"></div></div>
+    <div class="space-row"><span class="tag">space-4 / 16</span><div class="bar" style="width:var(--space-4)"></div></div>
+    <div class="space-row"><span class="tag">space-6 / 24</span><div class="bar" style="width:var(--space-6)"></div></div>
+    <div class="space-row"><span class="tag">space-8 / 32</span><div class="bar" style="width:var(--space-8)"></div></div>
+    <div class="space-row"><span class="tag">space-12 / 48</span><div class="bar" style="width:var(--space-12)"></div></div>
+    <div class="space-row"><span class="tag">space-16 / 64</span><div class="bar" style="width:var(--space-16)"></div></div>
+  </div>
+
+  <h2>Controls, radius & elevation</h2>
+  <div class="controls">
+    <button class="btn" style="height:var(--control-lg-height);border-radius:var(--radius-button-lg)">Large CTA</button>
+    <button class="btn sec" style="height:var(--control-md-height)">Medium</button>
+    <button class="btn out" style="height:var(--control-regular-height)">Outline</button>
+    <button class="btn" style="height:var(--control-sm-height);border-radius:var(--radius-pill);font-size:12px">Pill</button>
+  </div>
+  <div class="status" style="margin-top:var(--space-5)">
+    <span class="pill" style="background:var(--color-success);color:var(--color-success-on)">Completed</span>
+    <span class="pill" style="background:var(--color-warning);color:var(--color-warning-on)">Pending</span>
+    <span class="pill" style="background:var(--color-error);color:var(--color-error-on)">Failed</span>
+  </div>
+  <div class="card">
+    <div style="font-size:var(--text-title-sm-size);font-weight:var(--weight-emphasis)">Card on surface-variant</div>
+    <div style="font-size:var(--text-body-reg-size);color:var(--color-surface-on-dim);margin-top:var(--space-2)">radius-card + elevation-2, all from tokens.</div>
+  </div>
+</body>
+</html>

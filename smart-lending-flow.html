@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Adalfi — Smart Lending Flow</title>
+  <link rel="stylesheet" href="adelphi-tokens.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ── Reset ─────────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      min-height: 100%;
+      background: #050d0f;
+      font-family: var(--font-body, 'Inter', sans-serif);
+      -webkit-font-smoothing: antialiased;
+    }
+    button { font-family: inherit; cursor: pointer; }
+
+    /* ── Canvas ─────────────────────────────────────────────────────────────── */
+    #canvas {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 40px 24px 64px;
+      gap: 24px;
+    }
+
+    /* ── Page label ─────────────────────────────────────────────────────────── */
+    #page-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.42);
+      text-align: center;
+    }
+
+    /* ── Phone shell ────────────────────────────────────────────────────────── */
+    .phone {
+      width: 390px;
+      height: 844px;
+      background: var(--color-bg);
+      border-radius: 48px;
+      overflow: hidden;
+      position: relative;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.07),
+        0 40px 100px rgba(0,0,0,0.72),
+        0 8px 20px rgba(0,0,0,0.4);
+      flex-shrink: 0;
+    }
+
+    /* ── Screen layers ──────────────────────────────────────────────────────── */
+    .screen {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      background: var(--color-bg);
+      overflow: hidden;
+    }
+    .screen.active { display: flex; }
+
+    /* ── iOS status bar ─────────────────────────────────────────────────────── */
+    .status-bar {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 28px 0;
+      flex-shrink: 0;
+    }
+    .status-time {
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--color-surface-on);
+      letter-spacing: -0.01em;
+    }
+    .status-icons { display: flex; gap: 6px; align-items: center; }
+
+    /* ── App top bar ────────────────────────────────────────────────────────── */
+    .top-bar {
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      flex-shrink: 0;
+    }
+    .top-bar-left { display: flex; align-items: center; gap: 12px; }
+    .top-bar-title {
+      font-size: var(--text-title-sm-size, 18px);
+      font-weight: var(--weight-emphasis, 600);
+      color: var(--color-surface-on);
+      letter-spacing: -0.01em;
+    }
+    .btn-help {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--color-primary);
+      background: none;
+      border: none;
+      letter-spacing: 0.01em;
+    }
+    .btn-back {
+      background: none;
+      border: none;
+      color: var(--color-surface-on);
+      display: flex;
+      align-items: center;
+      padding: 6px;
+      border-radius: 50%;
+    }
+    .btn-back:active { background: rgba(255,255,255,0.06); }
+
+    /* ── Logo mark ──────────────────────────────────────────────────────────── */
+    .logo-mark {
+      width: 34px; height: 34px;
+      border-radius: 10px;
+      background: var(--color-primary-container);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; font-weight: 900;
+      color: var(--color-primary);
+    }
+    .logo-mark-light {
+      background: #08443a;
+    }
+
+    /* ── Scrollable body ────────────────────────────────────────────────────── */
+    .screen-body {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .screen-body::-webkit-scrollbar { display: none; }
+
+    /* ── Bottom zone ────────────────────────────────────────────────────────── */
+    .bottom-zone {
+      padding: 10px 20px 36px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* ── Buttons ────────────────────────────────────────────────────────────── */
+    .btn-cta {
+      width: 100%;
+      height: 48px;
+      border-radius: 1000px;
+      background: var(--color-primary);
+      color: var(--color-primary-on);
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      letter-spacing: 0.01em;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn-cta:active { opacity: 0.88; transform: scale(0.99); }
+    .btn-cta:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+
+    /* ── Stepper — segmented progress bar ───────────────────────────────────── */
+    .flow-dots {
+      display: flex;
+      gap: var(--space-2);            /* 8px between segments */
+      padding: 12px 20px 10px;
+      flex-shrink: 0;
+    }
+    .flow-dot {
+      flex: 1;
+      height: 5px;
+      border-radius: var(--radius-pill);
+      background: var(--color-outline);
+      transition: background 0.3s ease;
+    }
+    /* completed + current steps fill green */
+    .flow-dot.done { background: var(--color-primary); }
+
+    /* ── Approved badge ─────────────────────────────────────────────────────── */
+    .limit-badge {
+      margin: 4px 20px 20px;
+      padding: 14px 16px;
+      background: var(--color-primary-container);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .limit-badge-label {
+      font-size: 10px;
+      color: var(--color-primary-container-on);
+      opacity: 0.65;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+    .limit-badge-amount {
+      font-family: 'Inter', sans-serif;
+      font-size: 22px; font-weight: 700;
+      color: var(--color-primary);
+    }
+    .limit-badge-icon {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: rgba(30,215,152,0.12);
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* ── Amount display — outlined input card with caret ────────────────────── */
+    @keyframes border-pulse {
+      0%, 100% { box-shadow: var(--elevation-input-glow); }
+      50%       { box-shadow: 0 0 0 1px rgba(30,215,152,0.55),
+                              0 0 24px rgba(30,215,152,0.28),
+                              0 0 48px rgba(30,215,152,0.12); }
+    }
+    @keyframes caret-blink {
+      0%, 49% { opacity: 1; }
+      50%, 100%{ opacity: 0; }
+    }
+
+    .amount-display {
+      text-align: center;
+      padding: 14px 20px 16px;
+      flex-shrink: 0;
+      margin: 0 20px;
+      border: var(--stroke-strong) solid var(--color-outline-primary);
+      border-radius: var(--radius-card);
+      background: rgba(30, 215, 152, 0.03);
+      animation: border-pulse 2.6s ease-in-out infinite;
+      position: relative;
+    }
+    .amount-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      opacity: 0.55;
+      margin-bottom: 10px;
+    }
+    .amount-row {
+      display: flex;
+      height: 57.6px;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 6.4px;
+      flex-shrink: 0;
+      align-self: stretch;
+    }
+    .amount-currency {
+      font-family: 'Inter', sans-serif;
+      font-size: 28px; font-weight: 300;
+      color: var(--color-surface-on);
+      opacity: 0.55;
+      margin-top: 12px;
+      line-height: 1;
+    }
+    .amount-number {
+      font-family: 'Inter', sans-serif;
+      font-size: 68px; font-weight: 700;
+      color: var(--color-surface-on);
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+    /* blinking cursor */
+    .amount-number::after {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 0.70em;
+      background: var(--color-primary);
+      border-radius: 2px;
+      margin-left: 5px;
+      vertical-align: middle;
+      animation: caret-blink 1.1s step-start infinite;
+    }
+    .amount-underline {
+      display: none;
+      width: 52px; height: 2px;
+      background: var(--color-primary);
+      margin: 10px auto 0; border-radius: 1px;
+    }
+
+    /* ── Numpad ─────────────────────────────────────────────────────────────── */
+    .numpad {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid var(--color-outline);
+      flex-shrink: 0;
+    }
+    .numpad-key {
+      background: var(--color-secondary-container);
+      color: var(--color-surface-on);
+      font-family: 'Inter', sans-serif;
+      font-size: 26px; font-weight: 300;
+      height: 72px;
+      display: flex; align-items: center; justify-content: center;
+      border: none;
+      border-right: 1px solid var(--color-outline);
+      border-bottom: 1px solid var(--color-outline);
+      transition: background 0.08s;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .numpad-key:nth-child(3n) { border-right: none; }
+    .numpad-key:active { background: var(--color-surface-variant); }
+    .numpad-key.inactive { pointer-events: none; }
+
+    /* ── Tenor grid ─────────────────────────────────────────────────────────── */
+    .tenor-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 0 20px;
+    }
+    .tenor-card {
+      background: var(--color-surface-variant);
+      border-radius: 12px;
+      padding: 16px 14px 14px;
+      border: 1.5px solid transparent;
+      transition: border-color 0.2s, background 0.2s;
+      position: relative;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tenor-card:active { opacity: 0.85; }
+    .tenor-card.selected {
+      background: var(--color-selected-container);
+      border-color: var(--color-selected-container-on);
+    }
+    .tenor-months {
+      font-size: var(--text-subhead-sm-size);      /* 12 */
+      font-weight: 600;
+      color: var(--color-surface-on-dim);
+      letter-spacing: 0.06em; text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .tenor-card.selected .tenor-months {
+      color: var(--color-selected-container-on);
+      opacity: 0.7;
+    }
+    .tenor-monthly {
+      font-family: 'Inter', sans-serif;
+      font-size: var(--text-headline-sm-size);     /* 24 — primary emphasis */
+      font-weight: 700;
+      color: var(--color-primary);
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+    }
+    .tenor-card.selected .tenor-monthly { color: var(--color-selected-container-on); }
+    .tenor-per-mo {
+      font-size: var(--text-caption-sm-size);      /* 11 */
+      font-weight: 400;
+      color: var(--color-surface-on-dim); margin-left: 3px;
+    }
+    .tenor-card.selected .tenor-per-mo {
+      color: var(--color-selected-container-on);
+      opacity: 0.6;
+    }
+    .tenor-rate {
+      font-family: 'Inter', sans-serif;
+      font-size: var(--text-caption-reg-size);     /* 13 */
+      font-weight: 500;
+      color: var(--color-surface-on-dim); margin-top: 6px;
+    }
+    .tenor-card.selected .tenor-rate {
+      color: var(--color-selected-container-on);
+      opacity: 0.7;
+    }
+    .tenor-check { position: absolute; top: 10px; right: 10px; display: none; }
+    .tenor-card.selected .tenor-check { display: block; }
+    /* selected check adopts the selected text color (ink), checkmark in surface */
+    .tenor-card.selected .tenor-check circle { fill: var(--color-selected-container-on); }
+    .tenor-card.selected .tenor-check path   { stroke: var(--color-selected-container); }
+
+    /* ── Detail rows ────────────────────────────────────────────────────────── */
+    .detail-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 13px 0;
+      border-bottom: 1px solid var(--color-outline);
+    }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-label { font-size: 13px; color: var(--color-surface-on-dim); }
+    .detail-value {
+      font-family: 'Inter', sans-serif;
+      font-size: 15px; font-weight: 600; color: var(--color-surface-on);
+    }
+    .detail-value.accent { color: var(--color-primary); }
+
+    /* ── Legal text ─────────────────────────────────────────────────────────── */
+    .legal-title {
+      font-size: 13px; font-weight: 600;
+      color: var(--color-surface-on); margin-bottom: 8px;
+    }
+    .legal-section-title {
+      font-size: 10px; font-weight: 700;
+      color: var(--color-surface-on);
+      letter-spacing: 0.09em; text-transform: uppercase;
+      margin: 18px 0 6px;
+    }
+    .legal-text {
+      font-size: 11px; line-height: 1.65;
+      color: var(--color-surface-on-dim);
+    }
+
+    /* ── Success ring ───────────────────────────────────────────────────────── */
+    .success-ring {
+      width: 120px; height: 120px; border-radius: 50%;
+      border: 2.5px solid var(--color-primary);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 60px rgba(30,215,152,0.18), 0 0 120px rgba(30,215,152,0.08);
+      margin: 0 auto;
+    }
+
+    /* ── Stats row ──────────────────────────────────────────────────────────── */
+    .stats-row {
+      display: flex; align-items: stretch;
+      background: var(--color-surface-variant);
+      border-radius: 12px; overflow: hidden;
+    }
+    .stat-cell {
+      flex: 1; padding: 14px 12px;
+      display: flex; flex-direction: column; gap: 3px;
+    }
+    .stat-divider { width: 1px; background: var(--color-outline); }
+    .stat-label {
+      font-size: 9px; font-weight: 600;
+      color: var(--color-surface-on-dim);
+      letter-spacing: 0.08em; text-transform: uppercase;
+    }
+    .stat-value {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: 700;
+      color: var(--color-surface-on);
+    }
+
+    /* ── Installment item ───────────────────────────────────────────────────── */
+    .inst-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--color-outline);
+    }
+    .inst-item:last-child { border-bottom: none; }
+    .inst-label {
+      font-size: 14px; font-weight: 500;
+      color: var(--color-surface-on);
+      margin-bottom: 3px;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .inst-tag {
+      font-size: 9px; font-weight: 700;
+      background: var(--color-primary);
+      color: var(--color-primary-on);
+      padding: 2px 7px; border-radius: 10px;
+      letter-spacing: 0.04em;
+    }
+    .inst-date { font-size: 11px; color: var(--color-surface-on-dim); }
+    .inst-amount {
+      font-family: 'Inter', sans-serif;
+      font-size: 16px; font-weight: 700;
+      color: var(--color-surface-on);
+    }
+    .inst-amount.accent { color: var(--color-primary); }
+
+    /* ── Progress bar ───────────────────────────────────────────────────────── */
+    .progress-track {
+      height: 4px; background: var(--color-surface-variant);
+      border-radius: 2px; overflow: hidden; margin-bottom: 5px;
+    }
+    .progress-fill {
+      height: 100%; background: var(--color-primary); border-radius: 2px;
+    }
+
+    /* ── Note card ──────────────────────────────────────────────────────────── */
+    .note-card {
+      margin: 16px 20px 0;
+      padding: 12px 14px;
+      background: var(--color-surface-variant);
+      border-radius: 12px;
+      font-size: 11px; line-height: 1.6;
+      color: var(--color-surface-on-dim);
+      border-left: 2px solid var(--color-outline-primary);
+    }
+
+    /* ── Surface variant card ───────────────────────────────────────────────── */
+    .sv-card {
+      background: var(--color-surface-variant);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+
+    /* ── Limit card (Screen 1) — Figma radial gradient containment ──────────── */
+    .limit-card {
+      background: var(--gradient-approved-limit);
+      border-radius: var(--radius-card);
+      padding: 28px 24px 32px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--elevation-2);
+    }
+    .limit-card-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--p-ink-900);
+      opacity: 0.6;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    .limit-card-amount {
+      font-family: 'Inter', sans-serif;
+      font-size: 64px;
+      font-weight: 800;
+      color: var(--p-ink-900);
+      line-height: 1;
+      letter-spacing: -0.04em;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Approved limit card (Screen 2) — Figma radial gradient ────────────── */
+    .limit-hero {
+      flex-shrink: 0;
+      padding: 0 20px 16px;
+    }
+    .limit-hero-inner {
+      background: var(--gradient-approved-limit);
+      border-radius: var(--radius-card);
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--elevation-2);
+      position: relative;
+      overflow: hidden;
+    }
+    .limit-hero-inner::after { display: none; }
+    .limit-hero-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--p-ink-900);
+      opacity: 0.65;
+      margin-bottom: 4px;
+    }
+    .limit-hero-amount {
+      font-family: 'Inter', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--p-ink-900);
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+
+    /* ── Loan amount header card (Screen 3) — shared gradient containment ───── */
+    .loan-amount-card {
+      background: var(--gradient-approved-limit);
+      border-radius: var(--radius-card);
+      box-shadow: var(--elevation-2);
+      padding: 16px 18px;
+      margin: 0 20px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .loan-amount-card .lac-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--p-ink-900);
+      opacity: 0.65;
+      margin-bottom: 4px;
+    }
+    .loan-amount-card .lac-amount {
+      font-family: 'Inter', sans-serif;
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--p-ink-900);
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    .loan-amount-card .lac-edit {
+      background: rgba(7,33,38,0.10);
+      border: none;
+      color: var(--p-ink-900);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 7px 12px;
+      border-radius: var(--radius-pill);
+    }
+    .loan-amount-card .lac-edit:active { background: rgba(7,33,38,0.18); }
+
+    /* ── Side menu ──────────────────────────────────────────────────────────── */
+    .menu-overlay {
+      position: absolute; inset: 0; z-index: 200;
+      display: none; /* shown via .open class */
+    }
+    .menu-overlay.open { display: flex; }
+    .menu-scrim {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.55);
+    }
+    .menu-panel {
+      position: relative;
+      width: 268px; height: 100%;
+      background: #f5f3ef;
+      display: flex; flex-direction: column;
+      overflow-y: auto;
+    }
+    .menu-header {
+      padding: 56px 24px 24px;
+      border-bottom: 1px solid rgba(7,33,38,0.08);
+    }
+    .menu-user { font-size: 13px; color: #709397; margin-top: 6px; }
+    .menu-close {
+      position: absolute; top: 16px; right: 16px;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(7,33,38,0.07); border: none;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .menu-close:active { background: rgba(7,33,38,0.14); }
+    .menu-nav { padding: 8px 0; flex: 1; }
+    .menu-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 15px 24px;
+      font-size: 15px; font-weight: 500;
+      color: #072126;
+      background: none; border: none;
+      text-align: left; width: 100%;
+      transition: background 0.1s;
+    }
+    .menu-item:hover { background: rgba(7,33,38,0.04); }
+    .menu-item:active { background: rgba(7,33,38,0.08); }
+    .menu-section-title {
+      font-size: 10px; font-weight: 700;
+      color: #709397;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 16px 24px 6px;
+    }
+    .menu-divider { height: 1px; background: rgba(7,33,38,0.08); margin: 4px 0; }
+
+    /* ── Footer ─────────────────────────────────────────────────────────────── */
+    .footer-call {
+      text-align: center; font-size: 11px;
+      color: var(--color-surface-on-dim);
+      padding: 8px 20px 28px; flex-shrink: 0;
+    }
+
+    /* ── Desktop flow selector ──────────────────────────────────────────────── */
+    .flow-selector { display: flex; gap: 6px; align-items: center; }
+    .flow-dot-btn {
+      height: 8px; width: 8px; border-radius: 4px;
+      background: rgba(255,255,255,0.18);
+      border: none; padding: 0;
+      transition: all 0.2s;
+    }
+    .flow-dot-btn.active { width: 28px; background: var(--color-primary); }
+    .hint {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px; color: rgba(255,255,255,0.28);
+      letter-spacing: 0.04em;
+    }
+
+    /* ── Spacer ─────────────────────────────────────────────────────────────── */
+    .spacer { flex: 1; }
+  </style>
+</head>
+<body>
+<div id="canvas">
+  <div id="page-label">Adalfi · Smart Lending Flow</div>
+
+  <!-- ═══════════════════════ PHONE SHELL ═══════════════════════════════════ -->
+  <div class="phone" id="phone">
+
+    <!-- ── SIDE MENU OVERLAY ─────────────────────────────────────────────── -->
+    <div class="menu-overlay" id="menuOverlay">
+      <div class="menu-scrim" onclick="closeMenu()"></div>
+      <div class="menu-panel">
+        <button class="menu-close" onclick="closeMenu()" aria-label="Close">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="#072126" stroke-width="2" stroke-linecap="round">
+            <path d="M1 1l12 12M13 1L1 13"/>
+          </svg>
+        </button>
+        <div class="menu-header">
+          <div class="logo-mark logo-mark-light">A</div>
+          <div class="menu-user">Mehfooz Ali</div>
+        </div>
+        <nav class="menu-nav">
+          <button class="menu-item">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#072126" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9l6-6 6 6"/><path d="M4.5 7.5V15a.5.5 0 00.5.5h3V11h2v4.5h3a.5.5 0 00.5-.5V7.5"/>
+            </svg>
+            Logout
+          </button>
+          <div class="menu-divider"></div>
+          <button class="menu-item">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="#072126" stroke-width="1.5" stroke-linecap="round">
+              <circle cx="9" cy="9" r="7"/><path d="M9 6v3.5l2.5 1.5"/>
+            </svg>
+            Show Recommendations
+          </button>
+        </nav>
+        <div>
+          <div class="menu-divider"></div>
+          <div class="menu-section-title">Downloads</div>
+          <button class="menu-item" style="font-size:14px">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#072126" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8m0 0L5 7m3 3l3-3"/><path d="M2 12h12"/></svg>
+            Installment Plan
+          </button>
+          <button class="menu-item" style="font-size:14px">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#072126" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8m0 0L5 7m3 3l3-3"/><path d="M2 12h12"/></svg>
+            Application Form
+          </button>
+          <button class="menu-item" style="font-size:14px">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#072126" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8m0 0L5 7m3 3l3-3"/><path d="M2 12h12"/></svg>
+            Terms and Conditions
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SCREEN 1: CONGRATS ═══════════════════════════════ -->
+    <div class="screen active" id="screen-congrats">
+      <!-- Status bar -->
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="17" height="12" viewBox="0 0 17 12" fill="var(--color-surface-on)"><rect x="0" y="7" width="3" height="5" rx="1" opacity=".3"/><rect x="4.5" y="4.5" width="3" height="7.5" rx="1" opacity=".55"/><rect x="9" y="2" width="3" height="10" rx="1" opacity=".75"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="var(--color-surface-on)"><path d="M8 9.5a1.5 1.5 0 100 3 1.5 1.5 0 000-3z"/><path d="M3.5 6.5C4.9 5 6.35 4.2 8 4.2s3.1.8 4.5 2.3L14 5.2C12.2 3.2 10.2 2 8 2S3.8 3.2 2 5.2l1.5 1.3z" opacity=".5"/></svg>
+          <svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x=".5" y=".5" width="22" height="11" rx="3.5" stroke="var(--color-surface-on)" stroke-opacity=".35"/><rect x="2" y="2" width="17" height="8" rx="2" fill="var(--color-surface-on)"/><path d="M24 4v4a2 2 0 000-4z" fill="var(--color-surface-on)" opacity=".4"/></svg>
+        </div>
+      </div>
+      <!-- Top bar -->
+      <div class="top-bar">
+        <div class="top-bar-left">
+          <div class="logo-mark" onclick="openMenu()">A</div>
+        </div>
+        <button class="btn-help">Get Help</button>
+      </div>
+
+      <div class="screen-body" style="padding:8px 20px 0; display:flex; flex-direction:column;">
+        <div style="flex:1; display:flex; flex-direction:column; justify-content:center; padding-bottom:16px;">
+          <div style="font-size:32px; line-height:40px; font-weight:700; color:var(--color-surface-on); letter-spacing:-0.01em; margin-bottom:10px;">
+            Congrats Mehfooz!
+          </div>
+          <div style="font-size:16px; line-height:1.55; color:var(--color-surface-on-dim); margin-bottom:28px;">
+            You have been approved for a Personal Loan. Rates as low as 8%
+          </div>
+          <div class="limit-card">
+            <div class="limit-card-label">You can borrow up to</div>
+            <div class="limit-card-amount">Rs 68,000</div>
+          </div>
+          <div style="font-size:13px; color:var(--color-surface-on-dim); text-align:center; line-height:1.5;">
+            Continue to select the loan amount that works best for you
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom-zone">
+        <button class="btn-cta" onclick="goTo('enter-amount')">
+          Continue
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h10m-4-4l4 4-4 4"/></svg>
+        </button>
+      </div>
+      <div class="footer-call">Call us at 1-800-935-9935</div>
+    </div>
+
+    <!-- ══════════════════ SCREEN 2: ENTER AMOUNT ════════════════════════════ -->
+    <div class="screen" id="screen-enter-amount">
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="17" height="12" viewBox="0 0 17 12" fill="var(--color-surface-on)"><rect x="0" y="7" width="3" height="5" rx="1" opacity=".3"/><rect x="4.5" y="4.5" width="3" height="7.5" rx="1" opacity=".55"/><rect x="9" y="2" width="3" height="10" rx="1" opacity=".75"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x=".5" y=".5" width="22" height="11" rx="3.5" stroke="var(--color-surface-on)" stroke-opacity=".35"/><rect x="2" y="2" width="17" height="8" rx="2" fill="var(--color-surface-on)"/><path d="M24 4v4a2 2 0 000-4z" fill="var(--color-surface-on)" opacity=".4"/></svg>
+        </div>
+      </div>
+      <div class="top-bar">
+        <div class="top-bar-left">
+          <button class="btn-back" onclick="goTo('congrats')">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4L6 10l6 6"/></svg>
+          </button>
+          <span class="top-bar-title">Enter Loan Details</span>
+        </div>
+        <button class="btn-help">Get Help</button>
+      </div>
+
+      <!-- Stepper: step 1 of 3 — Loan Amount -->
+      <div class="flow-dots">
+        <div class="flow-dot done"></div>
+        <div class="flow-dot"></div>
+        <div class="flow-dot"></div>
+      </div>
+
+      <!-- Approved limit hero banner -->
+      <div class="limit-hero">
+        <div class="limit-hero-inner">
+          <div>
+            <div class="limit-hero-label">Approved Limit</div>
+            <div id="limitHeroAmount" class="limit-hero-amount">Rs 68,000</div>
+          </div>
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(7,33,38,0.12);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="var(--p-ink-900)" stroke-width="1.8" stroke-linecap="round"><circle cx="10" cy="10" r="8"/><path d="M6.5 10l2.5 2.5 4.5-4.5"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Amount display -->
+      <div class="amount-display">
+        <div class="amount-label">Enter Loan Amount</div>
+        <div class="amount-row">
+          <span class="amount-currency">Rs</span>
+          <span class="amount-number" id="amountDisplay">0</span>
+        </div>
+        <div class="amount-underline"></div>
+      </div>
+
+      <div class="spacer"></div>
+
+      <!-- Numpad -->
+      <div class="numpad">
+        <button class="numpad-key" onclick="numpadKey('1')">1</button>
+        <button class="numpad-key" onclick="numpadKey('2')">2</button>
+        <button class="numpad-key" onclick="numpadKey('3')">3</button>
+        <button class="numpad-key" onclick="numpadKey('4')">4</button>
+        <button class="numpad-key" onclick="numpadKey('5')">5</button>
+        <button class="numpad-key" onclick="numpadKey('6')">6</button>
+        <button class="numpad-key" onclick="numpadKey('7')">7</button>
+        <button class="numpad-key" onclick="numpadKey('8')">8</button>
+        <button class="numpad-key" onclick="numpadKey('9')">9</button>
+        <button class="numpad-key inactive" style="pointer-events:none;"></button>
+        <button class="numpad-key" onclick="numpadKey('0')">0</button>
+        <button class="numpad-key" onclick="numpadKey('DEL')">
+          <svg width="26" height="20" viewBox="0 0 26 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 2H23a1 1 0 011 1v14a1 1 0 01-1 1H9l-7-8 7-8z"/>
+            <path d="M14 8l5 4m0-4l-5 4"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="bottom-zone" style="padding-top:12px;">
+        <button class="btn-cta" id="btnContinueAmount" onclick="goTo('select-tenor')" disabled>
+          Continue
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h10m-4-4l4 4-4 4"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SCREEN 3: SELECT TENOR ════════════════════════════ -->
+    <div class="screen" id="screen-select-tenor">
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="17" height="12" viewBox="0 0 17 12" fill="var(--color-surface-on)"><rect x="0" y="7" width="3" height="5" rx="1" opacity=".3"/><rect x="4.5" y="4.5" width="3" height="7.5" rx="1" opacity=".55"/><rect x="9" y="2" width="3" height="10" rx="1" opacity=".75"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x=".5" y=".5" width="22" height="11" rx="3.5" stroke="var(--color-surface-on)" stroke-opacity=".35"/><rect x="2" y="2" width="17" height="8" rx="2" fill="var(--color-surface-on)"/><path d="M24 4v4a2 2 0 000-4z" fill="var(--color-surface-on)" opacity=".4"/></svg>
+        </div>
+      </div>
+      <div class="top-bar">
+        <div class="top-bar-left">
+          <button class="btn-back" onclick="goTo('enter-amount')">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4L6 10l6 6"/></svg>
+          </button>
+          <span class="top-bar-title">Select Tenor</span>
+        </div>
+        <button class="btn-help">Get Help</button>
+      </div>
+
+      <!-- Stepper: step 2 of 3 — Select Tenor -->
+      <div class="flow-dots">
+        <div class="flow-dot done"></div>
+        <div class="flow-dot done"></div>
+        <div class="flow-dot"></div>
+      </div>
+
+      <!-- Loan amount header — gradient containment card -->
+      <div class="loan-amount-card">
+        <div>
+          <div class="lac-label">Loan Amount</div>
+          <div id="tenorLoanAmount" class="lac-amount">Rs 0</div>
+        </div>
+        <button class="lac-edit" onclick="goTo('enter-amount')">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 1.5l2.5 2.5L4 12.5H1.5V10L10 1.5z"/></svg>
+          Edit
+        </button>
+      </div>
+
+      <div class="screen-body" style="padding-top:12px;">
+        <div id="tenorIntro" style="padding:0 20px 14px; font-size:13px; color:var(--color-surface-on-dim);">Select your preferred tenor</div>
+        <!-- Tenor cards rendered dynamically by the rule engine -->
+        <div class="tenor-grid" id="tenorGrid"></div>
+        <div class="note-card" id="tenorNote" style="display:none;">
+          One-time Service Fee is calculated on the basis of your Loan Amount and the Terms in the Financing Agreement.
+        </div>
+        <div style="height:16px;"></div>
+      </div>
+
+      <div class="bottom-zone">
+        <button class="btn-cta" id="btnContinueTenor" onclick="goTo('loan-summary')" disabled>
+          Continue
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h10m-4-4l4 4-4 4"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SCREEN 4: LOAN SUMMARY ════════════════════════════ -->
+    <div class="screen" id="screen-loan-summary">
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="17" height="12" viewBox="0 0 17 12" fill="var(--color-surface-on)"><rect x="0" y="7" width="3" height="5" rx="1" opacity=".3"/><rect x="4.5" y="4.5" width="3" height="7.5" rx="1" opacity=".55"/><rect x="9" y="2" width="3" height="10" rx="1" opacity=".75"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x=".5" y=".5" width="22" height="11" rx="3.5" stroke="var(--color-surface-on)" stroke-opacity=".35"/><rect x="2" y="2" width="17" height="8" rx="2" fill="var(--color-surface-on)"/><path d="M24 4v4a2 2 0 000-4z" fill="var(--color-surface-on)" opacity=".4"/></svg>
+        </div>
+      </div>
+      <div class="top-bar">
+        <div class="top-bar-left">
+          <button class="btn-back" onclick="goTo('select-tenor')">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4L6 10l6 6"/></svg>
+          </button>
+          <span class="top-bar-title">Loan Summary</span>
+        </div>
+        <button class="btn-help">Get Help</button>
+      </div>
+
+      <!-- Stepper: step 3 of 3 — Loan Summary -->
+      <div class="flow-dots">
+        <div class="flow-dot done"></div>
+        <div class="flow-dot done"></div>
+        <div class="flow-dot done"></div>
+      </div>
+
+      <!-- Summary cards -->
+      <div style="padding:0 20px 12px; display:flex; gap:10px; flex-shrink:0;">
+        <div class="sv-card" style="flex:1;">
+          <div style="font-size:9px; color:var(--color-surface-on-dim); text-transform:uppercase; letter-spacing:.08em; margin-bottom:5px;">Requested Amount</div>
+          <div id="summaryAmount" style="font-family:'Inter',sans-serif; font-size:22px; font-weight:700; color:var(--color-primary);">—</div>
+        </div>
+        <div class="sv-card" style="flex:1;">
+          <div style="font-size:9px; color:var(--color-surface-on-dim); text-transform:uppercase; letter-spacing:.08em; margin-bottom:5px;">Monthly Installment</div>
+          <div id="summaryMonthly" style="font-family:'Inter',sans-serif; font-size:22px; font-weight:700; color:var(--color-surface-on);">—</div>
+        </div>
+      </div>
+
+      <div class="screen-body" style="padding:4px 20px;">
+        <div class="detail-row">
+          <span class="detail-label">Tenor</span>
+          <span id="summaryTenor" class="detail-value">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Annual Markup Rate</span>
+          <span id="summaryRate" class="detail-value">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Final Payment Date</span>
+          <span id="summaryFinalDate" class="detail-value">—</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Next Installment Date</span>
+          <span id="summaryNextDate" class="detail-value">—</span>
+        </div>
+        <div class="detail-row" style="border-bottom:none;">
+          <span class="detail-label">Next Installment Amount</span>
+          <span id="summaryNextAmt" class="detail-value accent">—</span>
+        </div>
+
+        <div style="margin-top:20px;">
+          <div class="legal-title">Agreement for Financing</div>
+          <div class="legal-text">You agree to abide and adhere to all of the following terms stated in this Agreement on the dates mentioned in Schedule — A annexed hereto and shall be read as an integral part of this Agreement for Financing on Murābaḥa (Murābaḥa Agreement).</div>
+          <div class="legal-section-title">Termination</div>
+          <div class="legal-text">The AF Bank reserves its rights to terminate these Terms in the event of any breach. Any third party on the Platform has the right to terminate these Terms; the bank reserves all rights to terminate upon reasonable notice if any of the terms are not met.</div>
+          <div class="legal-section-title">Disclaimer of Warranties</div>
+          <div class="legal-text">The Platform and the Services on the Platform are provided on an "as is" and "as available" basis. The AF Bank makes no representations or warranties of any kind, express or implied, regarding the Platform.</div>
+          <div class="legal-section-title">Choice of Law and Jurisdiction</div>
+          <div class="legal-text">This AGREEMENT is made at the place and on the date mentioned in Schedule — A. This Agreement shall be construed and governed by applicable laws without regard to principles of conflict of laws. Parties agree that designated courts shall have exclusive jurisdiction over any disputes.</div>
+        </div>
+        <div style="height:20px;"></div>
+      </div>
+
+      <div class="bottom-zone">
+        <button class="btn-cta" onclick="goTo('success')">
+          Agree and Confirm
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9l4 4 6-6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SCREEN 5: SUCCESS ════════════════════════════════ -->
+    <div class="screen" id="screen-success">
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="17" height="12" viewBox="0 0 17 12" fill="var(--color-surface-on)"><rect x="0" y="7" width="3" height="5" rx="1" opacity=".3"/><rect x="4.5" y="4.5" width="3" height="7.5" rx="1" opacity=".55"/><rect x="9" y="2" width="3" height="10" rx="1" opacity=".75"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x=".5" y=".5" width="22" height="11" rx="3.5" stroke="var(--color-surface-on)" stroke-opacity=".35"/><rect x="2" y="2" width="17" height="8" rx="2" fill="var(--color-surface-on)"/><path d="M24 4v4a2 2 0 000-4z" fill="var(--color-surface-on)" opacity=".4"/></svg>
+        </div>
+      </div>
+      <div class="top-bar">
+        <div class="top-bar-left">
+          <div class="logo-mark" onclick="openMenu()">A</div>
+        </div>
+        <button class="btn-help">Get Help</button>
+      </div>
+
+      <div class="screen-body" style="padding:8px 20px 0; display:flex; flex-direction:column; align-items:center;">
+        <!-- Success ring -->
+        <div style="padding:28px 0 24px;">
+          <div class="success-ring">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="var(--color-primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10 24l10 10L38 10"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Confirmation text -->
+        <div style="text-align:center; max-width:280px; margin-bottom:6px; line-height:1.5;">
+          <span id="successAmount" style="font-family:'Inter',sans-serif; font-size:22px; font-weight:700; color:var(--color-primary);">—</span>
+          <span style="font-size:15px; color:var(--color-surface-on);"> has been disbursed successfully to your account</span>
+        </div>
+        <div style="font-family:'Inter',sans-serif; font-size:20px; font-weight:600; color:var(--color-surface-on); letter-spacing:0.04em; margin-bottom:28px;">****1980</div>
+
+        <!-- Stats strip -->
+        <div class="stats-row" style="width:100%; margin-bottom:12px;">
+          <div class="stat-cell">
+            <span class="stat-label">Monthly</span>
+            <span id="successMonthly" class="stat-value">—</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-cell">
+            <span class="stat-label">Tenor</span>
+            <span id="successTenor" class="stat-value">—</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-cell">
+            <span class="stat-label">Final Due</span>
+            <span id="successFinalDate" class="stat-value">—</span>
+          </div>
+        </div>
+
+        <!-- Detail card -->
+        <div class="sv-card" style="width:100%;">
+          <div class="detail-row" style="padding-top:0;">
+            <span class="detail-label">Markup Rate</span>
+            <span id="successRate" class="detail-value accent">—</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Annual Markup</span>
+            <span id="successAnnualRate" class="detail-value">—</span>
+          </div>
+          <div style="padding-top:12px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:12px; font-weight:600; color:var(--color-primary); margin-bottom:3px;">Next Installment</div>
+              <div id="successNextDate" style="font-size:11px; color:var(--color-surface-on-dim);">—</div>
+            </div>
+            <div id="successNextAmt" style="font-family:'Inter',sans-serif; font-size:22px; font-weight:700; color:var(--color-surface-on);">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bottom-zone">
+        <button class="btn-cta" onclick="goTo('installment-plan')">
+          View Loan Details
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h10m-4-4l4 4-4 4"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ══════════════════ SCREEN 6: INSTALLMENT PLAN ════════════════════════ -->
+    <div class="screen" id="screen-installment-plan">
+      <div class="status-bar">
+        <span class="status-time">9:41</span>
+        <div class="status-icons">
+          <svg width="17" height="12" viewBox="0 0 17 12" fill="var(--color-surface-on)"><rect x="0" y="7" width="3" height="5" rx="1" opacity=".3"/><rect x="4.5" y="4.5" width="3" height="7.5" rx="1" opacity=".55"/><rect x="9" y="2" width="3" height="10" rx="1" opacity=".75"/><rect x="13.5" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="26" height="12" viewBox="0 0 26 12" fill="none"><rect x=".5" y=".5" width="22" height="11" rx="3.5" stroke="var(--color-surface-on)" stroke-opacity=".35"/><rect x="2" y="2" width="17" height="8" rx="2" fill="var(--color-surface-on)"/><path d="M24 4v4a2 2 0 000-4z" fill="var(--color-surface-on)" opacity=".4"/></svg>
+        </div>
+      </div>
+      <div class="top-bar">
+        <div class="top-bar-left">
+          <button class="btn-back" onclick="goTo('success')">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4L6 10l6 6"/></svg>
+          </button>
+          <span class="top-bar-title">Installment Plan</span>
+        </div>
+        <button class="btn-help">Get Help</button>
+      </div>
+
+      <!-- Summary header -->
+      <div style="padding:0 20px 16px; flex-shrink:0;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:16px;">
+          <div>
+            <div style="font-size:10px; color:var(--color-surface-on-dim); text-transform:uppercase; letter-spacing:.07em; margin-bottom:4px;">Loan Amount</div>
+            <div id="planLoanAmount" style="font-family:'Inter',sans-serif; font-size:30px; font-weight:700; color:var(--color-primary); letter-spacing:-0.01em;">—</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:10px; color:var(--color-surface-on-dim); text-transform:uppercase; letter-spacing:.07em; margin-bottom:4px;">Monthly</div>
+            <div id="planMonthly" style="font-family:'Inter',sans-serif; font-size:18px; font-weight:600; color:var(--color-surface-on);">—</div>
+            <div id="planTenorLabel" style="font-size:10px; color:var(--color-surface-on-dim);">—</div>
+          </div>
+        </div>
+        <!-- Paid / Remaining -->
+        <div style="display:flex; gap:10px; margin-bottom:14px;">
+          <div class="sv-card" style="flex:1;">
+            <div style="font-size:9px; color:var(--color-surface-on-dim); text-transform:uppercase; letter-spacing:.07em; margin-bottom:4px;">Paid</div>
+            <div id="planPaid" style="font-family:'Inter',sans-serif; font-size:18px; font-weight:700; color:var(--color-primary);">—</div>
+          </div>
+          <div class="sv-card" style="flex:1;">
+            <div style="font-size:9px; color:var(--color-surface-on-dim); text-transform:uppercase; letter-spacing:.07em; margin-bottom:4px;">Remaining</div>
+            <div id="planRemaining" style="font-family:'Inter',sans-serif; font-size:18px; font-weight:700; color:var(--color-surface-on);">—</div>
+          </div>
+        </div>
+        <!-- Progress bar -->
+        <div class="progress-track">
+          <div class="progress-fill" id="planProgressFill" style="width:2%;"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <div id="planProgressLabel" style="font-size:10px; color:var(--color-primary);">1 of — paid</div>
+          <div id="planRemainingLabel" style="font-size:10px; color:var(--color-surface-on-dim);">— remaining</div>
+        </div>
+      </div>
+
+      <div style="height:1px; background:var(--color-outline); margin:0 20px; flex-shrink:0;"></div>
+
+      <!-- Installment list — rendered by JS -->
+      <div class="screen-body" style="padding:0 20px;">
+        <div id="installmentList"></div>
+        <div style="height:24px;"></div>
+      </div>
+    </div>
+
+  </div><!-- /phone -->
+
+  <!-- ── Desktop flow selector ───────────────────────────────────────────── -->
+  <div class="flow-selector" id="flowSelector">
+    <button class="flow-dot-btn active" onclick="goTo('congrats')"       title="Congrats"></button>
+    <button class="flow-dot-btn"        onclick="goTo('enter-amount')"   title="Enter Amount"></button>
+    <button class="flow-dot-btn"        onclick="goTo('select-tenor')"   title="Select Tenor"></button>
+    <button class="flow-dot-btn"        onclick="goTo('loan-summary')"   title="Loan Summary"></button>
+    <button class="flow-dot-btn"        onclick="goTo('success')"        title="Disbursed"></button>
+    <button class="flow-dot-btn"        onclick="goTo('installment-plan')" title="Installments"></button>
+  </div>
+  <div class="hint">Click a dot · or use Continue buttons · to navigate screens</div>
+
+</div><!-- /canvas -->
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   APP STATE — single source of truth
+   ═══════════════════════════════════════════════════════════════════════════ */
+var App = {
+  maxLimit: 68000,          // bank-offered approved limit
+  minAmount: 1000,          // minimum enterable amount
+  selectedAmount: 0,        // user-chosen loan amount
+  selectedTenor: null,      // chosen tenor in months
+
+  /* Annual markup rates per tenor (flat-rate on reducing balance) */
+  RATES: { 12: 0.08, 18: 0.0833, 24: 0.0846, 36: 0.0875, 48: 0.09 },
+
+  /* ── Tenor business-rule configuration ───────────────────────────────────
+     Drives which tenor options are offered based on utilization. Change these
+     constants to adjust policy WITHOUT touching UI code.
+     ────────────────────────────────────────────────────────────────────── */
+  LOW_UTILIZATION_THRESHOLD: 60,        // % below which only long tenures show
+  LONG_TENURE_OPTIONS:     [48],        // shown when utilization < threshold
+  STANDARD_TENURE_OPTIONS: [18, 24, 36, 48],  // shown when utilization >= threshold
+
+  /* Disbursement reference date — today */
+  disbursementDate: new Date(),
+
+  /* ── Rule engine ─────────────────────────────────────────────────────────
+     Utilization % = (selectedAmount / maxLimit) * 100
+     Returns the list of eligible tenors for the current state.            */
+  utilization: function() {
+    if (!App.maxLimit) return 0;
+    return (App.selectedAmount / App.maxLimit) * 100;
+  },
+  eligibleTenors: function() {
+    if (App.selectedAmount < App.minAmount) return [];
+    var opts = (App.utilization() < App.LOW_UTILIZATION_THRESHOLD)
+      ? App.LONG_TENURE_OPTIONS
+      : App.STANDARD_TENURE_OPTIONS;
+    /* longest first for display, defensive copy */
+    return opts.slice().sort(function(a, b) { return b - a; });
+  },
+
+  /* ── Core finance formula ────────────────────────────────────────────── */
+  /* Standard amortising PMT: P·r(1+r)^n / ((1+r)^n − 1)                  */
+  calcMonthly: function(principal, months) {
+    if (!principal || !months) return 0;
+    var r = App.RATES[months] / 12;
+    var n = months;
+    var pmt = principal * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1);
+    return Math.round(pmt);
+  },
+
+  /* ── Derived helpers ─────────────────────────────────────────────────── */
+  monthlyForTenor: function(months) {
+    return App.calcMonthly(App.selectedAmount, months);
+  },
+  selectedMonthly: function() {
+    return App.calcMonthly(App.selectedAmount, App.selectedTenor);
+  },
+  finalDate: function(months) {
+    var d = new Date(App.disbursementDate);
+    d.setMonth(d.getMonth() + (months || App.selectedTenor));
+    return d;
+  },
+  nextInstallmentDate: function() {
+    var d = new Date(App.disbursementDate);
+    d.setMonth(d.getMonth() + 1);
+    return d;
+  }
+};
+
+/* ── Formatting helpers ──────────────────────────────────────────────────── */
+var MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function fmtUSD(n) {
+  if (!n) return 'Rs 0';
+  return 'Rs ' + Math.round(n).toLocaleString('en-US');
+}
+function fmtDate(d) {
+  return String(d.getDate()).padStart(2,'0') + ' ' + MONTHS_SHORT[d.getMonth()] + ' ' + d.getFullYear();
+}
+function fmtDateLong(d) {
+  return 'Due on ' + String(d.getDate()).padStart(2,'0') + ' ' + MONTHS_SHORT[d.getMonth()] + ', ' + d.getFullYear();
+}
+function fmtRate(r) {
+  return (r * 100).toFixed(2) + '%';
+}
+
+/* ── DOM setter (safe) ───────────────────────────────────────────────────── */
+function set(id, text) {
+  var el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TENOR RULE ENGINE — render only eligible tenor cards
+   ═══════════════════════════════════════════════════════════════════════════ */
+function renderTenorOptions() {
+  var grid = document.getElementById('tenorGrid');
+  if (!grid) return;
+
+  var amt     = App.selectedAmount;
+  var tenors  = App.eligibleTenors();
+
+  /* if the currently-selected tenor is no longer eligible, clear it */
+  if (App.selectedTenor && tenors.indexOf(App.selectedTenor) === -1) {
+    App.selectedTenor = null;
+    document.getElementById('tenorNote').style.display = 'none';
+    document.getElementById('btnContinueTenor').disabled = true;
+  }
+
+  var checkSvg =
+    '<div class="tenor-check">' +
+    '<svg width="18" height="18" viewBox="0 0 18 18">' +
+    '<circle cx="9" cy="9" r="9" fill="var(--color-primary)"/>' +
+    '<path d="M5.5 9l2.5 2.5 4.5-4.5" stroke="var(--color-primary-on)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>' +
+    '</svg></div>';
+
+  var html = '';
+  tenors.forEach(function(m) {
+    var selected = (App.selectedTenor === m) ? ' selected' : '';
+    var monthly  = amt > 0 ? fmtUSD(App.calcMonthly(amt, m)) : '—';
+    var rate     = (App.RATES[m] * 100).toFixed(2);
+    html +=
+      '<div class="tenor-card' + selected + '" id="tenor-' + m + '" onclick="selectTenor(' + m + ')">' +
+        checkSvg +
+        '<div class="tenor-months">' + m + ' Months</div>' +
+        '<div class="tenor-monthly">' + monthly + '<span class="tenor-per-mo">/mo</span></div>' +
+        '<div class="tenor-rate">' + rate + '% markup</div>' +
+      '</div>';
+  });
+  grid.innerHTML = html;
+
+  /* contextual intro copy reflecting the rule outcome */
+  var intro = document.getElementById('tenorIntro');
+  if (intro) {
+    if (tenors.length === 0) {
+      intro.textContent = 'Enter a loan amount to see your tenor options';
+    } else if (tenors.length === 1) {
+      intro.textContent = 'Based on your loan amount, this tenor is available';
+    } else {
+      intro.textContent = 'Select your preferred tenor';
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RENDER — push App state to every bound DOM node
+   ═══════════════════════════════════════════════════════════════════════════ */
+function renderAll() {
+  var amt    = App.selectedAmount;
+  var tenor  = App.selectedTenor;
+  var mo     = App.selectedMonthly();
+  var rate   = tenor ? App.RATES[tenor] : null;
+
+  /* ── Screen 2: approved limit hero ─────────────────────────────────── */
+  var heroAmt = document.getElementById('limitHeroAmount');
+  if (heroAmt) heroAmt.textContent = fmtUSD(App.maxLimit);
+
+  /* ── Screen 3: loan amount header + rule-driven tenor cards ─────────── */
+  set('tenorLoanAmount', amt > 0 ? fmtUSD(amt) : '—');
+  renderTenorOptions();
+
+  /* ── Screen 4: loan summary ─────────────────────────────────────────── */
+  set('summaryAmount',  amt  > 0 ? fmtUSD(amt)               : '—');
+  set('summaryMonthly', mo   > 0 ? fmtUSD(mo)                : '—');
+  set('summaryTenor',   tenor     ? tenor + ' Months'         : '—');
+  set('summaryRate',    rate      ? fmtRate(rate)             : '—');
+  set('summaryFinalDate', tenor   ? fmtDate(App.finalDate())  : '—');
+  set('summaryNextDate',  tenor   ? fmtDate(App.nextInstallmentDate()) : '—');
+  set('summaryNextAmt',   mo > 0  ? fmtUSD(mo)               : '—');
+
+  /* ── Screen 5: success / disbursed ──────────────────────────────────── */
+  set('successAmount',    amt  > 0 ? fmtUSD(amt)              : '—');
+  set('successMonthly',   mo   > 0 ? fmtUSD(mo)               : '—');
+  set('successTenor',     tenor     ? tenor + ' Months'        : '—');
+  set('successFinalDate', tenor     ? fmtDate(App.finalDate()) : '—');
+  set('successRate',      rate      ? fmtRate(rate)            : '—');
+  set('successAnnualRate',rate      ? fmtRate(rate)            : '—');
+  var nextD = App.nextInstallmentDate();
+  set('successNextDate',  tenor ? 'Due on ' + fmtDate(nextD)  : '—');
+  set('successNextAmt',   mo > 0 ? fmtUSD(mo)                 : '—');
+
+  /* ── Screen 6: installment plan ──────────────────────────────────────── */
+  set('planLoanAmount',  amt  > 0 ? fmtUSD(amt)               : '—');
+  set('planMonthly',     mo   > 0 ? fmtUSD(mo)                : '—');
+  set('planTenorLabel',  tenor     ? tenor + ' Months'         : '—');
+  set('planPaid',        mo   > 0 ? fmtUSD(mo)                : '—');
+
+  if (tenor && mo > 0) {
+    /* remaining principal after first payment using amortisation */
+    var r = App.RATES[tenor] / 12;
+    var interestFirst = amt * r;
+    var principalFirst = mo - interestFirst;
+    var remainingBal = Math.round(amt - principalFirst);
+    set('planRemaining', fmtUSD(remainingBal));
+
+    var pct = (1 / tenor * 100).toFixed(1);
+    var fill = document.getElementById('planProgressFill');
+    if (fill) fill.style.width = pct + '%';
+    set('planProgressLabel', '1 of ' + tenor + ' paid');
+    set('planRemainingLabel', (tenor - 1) + ' remaining');
+
+    renderInstallmentList(amt, mo, tenor);
+  } else {
+    set('planRemaining', '—');
+    set('planProgressLabel', '— paid');
+    set('planRemainingLabel', '—');
+  }
+}
+
+/* ── Generate installment rows dynamically ───────────────────────────────── */
+function renderInstallmentList(principal, monthly, tenor) {
+  var list = document.getElementById('installmentList');
+  if (!list) return;
+
+  var rows = '';
+  var balance = principal;
+  var r = App.RATES[tenor] / 12;
+  var base = new Date(App.disbursementDate);
+  var maxRows = Math.min(tenor, 8);   /* show first 8 */
+
+  for (var i = 1; i <= maxRows; i++) {
+    var dueDate = new Date(base);
+    dueDate.setMonth(dueDate.getMonth() + i);
+
+    var interest  = balance * r;
+    var principal_part = monthly - interest;
+    balance = Math.max(0, balance - principal_part);
+
+    var isFirst = i === 1;
+    var label   = isFirst ? 'Next Installment' : 'Installment ' + i;
+    var tag     = isFirst ? '<span class="inst-tag">Upcoming</span>' : '';
+    var cls     = isFirst ? 'inst-amount accent' : 'inst-amount';
+
+    rows += '<div class="inst-item">'
+      + '<div>'
+      + '<div class="inst-label">' + label + ' ' + tag + '</div>'
+      + '<div class="inst-date">' + fmtDateLong(dueDate) + '</div>'
+      + '</div>'
+      + '<div class="' + cls + '">' + fmtUSD(monthly) + '</div>'
+      + '</div>';
+  }
+
+  if (tenor > maxRows) {
+    rows += '<div style="text-align:center;padding:12px 0;font-size:12px;color:var(--color-surface-on-dim);">'
+      + '+ ' + (tenor - maxRows) + ' more installments</div>';
+  }
+
+  list.innerHTML = rows;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   NAVIGATION
+   ═══════════════════════════════════════════════════════════════════════════ */
+var SCREENS = ['congrats','enter-amount','select-tenor','loan-summary','success','installment-plan'];
+var current = 'congrats';
+
+function goTo(id) {
+  SCREENS.forEach(function(s) {
+    var el = document.getElementById('screen-' + s);
+    if (el) el.classList.remove('active');
+  });
+  var target = document.getElementById('screen-' + id);
+  if (target) target.classList.add('active');
+  current = id;
+
+  /* sync desktop dots */
+  document.querySelectorAll('#flowSelector .flow-dot-btn').forEach(function(d, i) {
+    d.classList.toggle('active', SCREENS[i] === id);
+  });
+
+  /* page label */
+  var labels = { 'congrats':'Congrats', 'enter-amount':'Enter Amount',
+    'select-tenor':'Select Tenor', 'loan-summary':'Loan Summary',
+    'success':'Disbursed', 'installment-plan':'Installments' };
+  var idx = SCREENS.indexOf(id) + 1;
+  document.getElementById('page-label').textContent =
+    'Adalfi · Smart Lending Flow · ' + (labels[id] || id) + ' (' + idx + '/' + SCREENS.length + ')';
+
+  /* always re-render when switching screens */
+  renderAll();
+}
+
+/* ── Side menu ───────────────────────────────────────────────────────────── */
+function openMenu()  { document.getElementById('menuOverlay').classList.add('open'); }
+function closeMenu() { document.getElementById('menuOverlay').classList.remove('open'); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   NUMPAD — updates App.selectedAmount on every keystroke
+   ═══════════════════════════════════════════════════════════════════════════ */
+var amountDigits = '';
+
+function numpadKey(key) {
+  if (key === 'DEL') {
+    amountDigits = amountDigits.slice(0, -1);
+  } else {
+    var next = amountDigits + key;
+    if (next.length > 6) return;
+    if (parseInt(next, 10) > App.maxLimit) return;
+    amountDigits = next;
+  }
+
+  var num = amountDigits ? parseInt(amountDigits, 10) : 0;
+  App.selectedAmount = num;
+
+  /* update live display */
+  document.getElementById('amountDisplay').textContent =
+    num > 0 ? num.toLocaleString('en-US') : '0';
+
+  /* enable/disable Continue */
+  document.getElementById('btnContinueAmount').disabled = (num < App.minAmount);
+
+  /* re-run rule engine so tenor options reflect the new utilization */
+  renderTenorOptions();
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TENOR SELECTION
+   ═══════════════════════════════════════════════════════════════════════════ */
+function selectTenor(months) {
+  /* only allow selecting an eligible tenor */
+  if (App.eligibleTenors().indexOf(months) === -1) return;
+
+  document.querySelectorAll('#tenorGrid .tenor-card').forEach(function(el) {
+    el.classList.remove('selected');
+  });
+  var card = document.getElementById('tenor-' + months);
+  if (card) card.classList.add('selected');
+
+  App.selectedTenor = months;
+
+  document.getElementById('tenorNote').style.display = 'block';
+  document.getElementById('btnContinueTenor').disabled = false;
+
+  /* re-render to propagate new tenor to downstream screens */
+  renderAll();
+}
+
+/* ── Boot ────────────────────────────────────────────────────────────────── */
+renderAll();
+</script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adalfi — AI-Native Product Design Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      background: #050d0f;
+      color: #e8f0f2;
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Nav */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      background: rgba(5,13,15,0.90);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      z-index: 10;
+    }
+    .nav-logo {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: #00d4aa;
+    }
+    .nav-badge {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(232,240,242,0.45);
+    }
+
+    /* Hero — exactly one viewport */
+    .hero {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 80px 24px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -180px; left: 50%;
+      transform: translateX(-50%);
+      width: 700px; height: 700px;
+      background: radial-gradient(circle, rgba(0,212,170,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #00d4aa;
+      margin-bottom: 28px;
+      padding: 6px 18px;
+      border: 1px solid rgba(0,212,170,0.28);
+      border-radius: 999px;
+      background: rgba(0,212,170,0.08);
+    }
+
+    h1 {
+      font-size: clamp(38px, 6vw, 68px);
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      margin-bottom: 20px;
+      max-width: 720px;
+    }
+    h1 span { color: #00d4aa; }
+
+    .subtitle {
+      font-size: clamp(14px, 1.8vw, 17px);
+      color: rgba(232,240,242,0.55);
+      max-width: 500px;
+      line-height: 1.7;
+      margin-bottom: 44px;
+    }
+
+    .cta-group {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 32px;
+      background: #00d4aa;
+      color: #050d0f;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 999px;
+      text-decoration: none;
+      font-family: 'Inter', sans-serif;
+      transition: opacity 0.18s, transform 0.18s;
+    }
+    .btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 32px;
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #e8f0f2;
+      font-size: 15px;
+      font-weight: 500;
+      border-radius: 999px;
+      text-decoration: none;
+      background: rgba(255,255,255,0.04);
+      font-family: 'Inter', sans-serif;
+      transition: border-color 0.18s, transform 0.18s;
+    }
+    .btn-secondary:hover { border-color: rgba(255,255,255,0.25); transform: translateY(-1px); }
+
+    /* Chips */
+    .chips {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .chip {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 5px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.08);
+      color: rgba(232,240,242,0.45);
+      background: rgba(255,255,255,0.03);
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-logo">adalfi</div>
+    <div class="nav-badge">UX Case Study · 2025</div>
+  </nav>
+
+  <div class="hero">
+    <div class="eyebrow">✦ AI-Native Product Design</div>
+    <h1>Smart Lending,<br><span>Designed by Prompt</span></h1>
+    <p class="subtitle">
+      A fintech prototype built entirely through prompt-driven design — from token architecture to interactive flow — without writing a single line of code by hand.
+    </p>
+    <div class="cta-group">
+      <a class="btn-primary" href="smart-lending-flow.html">&#9654;&nbsp; View Live Prototype</a>
+      <a class="btn-secondary" href="preview.html">Design Tokens Preview</a>
+    </div>
+    <div class="chips">
+      <span class="chip">Figma → Token → Code</span>
+      <span class="chip">Prompt Engineering</span>
+      <span class="chip">CSS Design Tokens</span>
+      <span class="chip">Mobile-First</span>
+      <span class="chip">Dark / Light Mode</span>
+    </div>
+  </div>
+
+</body>
+</html>
